@@ -3,6 +3,7 @@ const axios = require("axios");
 const { readCsv } = require('../helpers/readXlxs');
 const { logger } = require('../helpers/logger')
 require('dotenv').config();
+const { Parser } = require('json2csv');
 
 const token = process.env.ACCESS_TOKEN;
 const filePath = './meta_info.xlsx';
@@ -99,6 +100,34 @@ const createMetafields = async (req, res) => {
 };
 
 
+const getMeta = async (req,res) => {
+    
+const myCars = [
+    {
+        "car": "Audi",
+        "price": 40000,
+        "color": "blue"
+    }, {
+        "car": "BMW",
+        "price": 35000,
+        "color": "black"
+    }, {
+        "car": "Porsche",
+        "price": 60000,
+        "color": "green"
+    }
+];
+
+const json2csvParser = new Parser();
+const csv = json2csvParser.parse(myCars);
+
+console.log(csv);
+fs.writeFile('cars.csv', csv, function(err) {
+        if (err) throw err;
+        console.log('cars file saved');
+      });
+}
+
 // create new metafields for specific product
 // const createMetafields = async (req, res) => {
 
@@ -133,5 +162,6 @@ const createMetafields = async (req, res) => {
 module.exports = {
     countMetafields,
     getMetafield,
-    createMetafields
+    createMetafields,
+    getMeta
 };

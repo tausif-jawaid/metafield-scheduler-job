@@ -1,3 +1,6 @@
 node_modules
 /node_modules
 .env
+Import_logger_file_
+Export_logger_file_
+metafields.csv

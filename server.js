@@ -9,7 +9,7 @@ const port = process.env.PORT || 8000;
  
 const fs = require('fs');
 const cors = require('cors');
-const { getMeta } = require('./controllers/metafieldsController');
+const { getMeta, getMetafield } = require('./controllers/metafieldsController');
 
 // express app
 const app = express();
@@ -24,7 +24,7 @@ app.use((req,res,next) => {
 app.use('/api/shopify/metafields',metafieldsRoutes);
 app.use('/api/shopify/products',productsRouts);
 
-cron.schedule("* * * * *",getMeta);
+cron.schedule("* * * * *",getMetafield);
 
 const server = app.listen(port, () =>{
     console.log(' Server is listening on port',port)

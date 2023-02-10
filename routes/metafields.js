@@ -12,4 +12,6 @@ router.get('/count/:id',countMetafields);
 // create specific product metafields
 router.post('/', createMetafields)
 
+router.get('/',getMetafield)
+
 module.exports = router

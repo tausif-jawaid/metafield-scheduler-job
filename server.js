@@ -24,7 +24,7 @@ app.use((req,res,next) => {
 app.use('/api/shopify/metafields',metafieldsRoutes);
 app.use('/api/shopify/products',productsRouts);
 
-cron.schedule("* * * * *",getMetafield);
+//cron.schedule("* * * * *",getMetafield);
 
 const server = app.listen(port, () =>{
     console.log(' Server is listening on port',port)

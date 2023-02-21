@@ -5,6 +5,7 @@ const fsPromise = require("fs/promises")
 const readline = require("node:readline");
 const Excel = require("exceljs");
 require('dotenv').config();
+const { Exportlogger } = require('../helpers/logger')
 
 const token = process.env.ACCESS_TOKEN;
 
@@ -92,20 +93,41 @@ const getAllData = async (url) => {
 }
 
 const readFile = async (path) => {
-    const fileStream = fs.createReadStream(path);
-    const rl = readline.createInterface({ input: fileStream, crlfDelay: Infinity, });
-    const workbook = new Excel.Workbook();
-    const worksheet = workbook.addWorksheet("My Sheet");
-    worksheet.columns = [
-        { header: 'Id', key: 'id', width: 10 },
-        { header: 'Value', key: 'value', width: 32 },
-        { header: 'Namespace', key: 'namespace', width: 15, },
-        { header: 'Key', key: 'key', width: 15, }
-    ];
-    for await (const line of rl) {
-        worksheet.addRow(JSON.parse(line));
+
+    try {
+        const fileStream = fs.createReadStream(path);
+        const rl = readline.createInterface({ input: fileStream, crlfDelay: Infinity, });
+        const workbook = new Excel.Workbook();
+        const worksheet = workbook.addWorksheet("My Sheet");
+        worksheet.columns = [
+            { header: 'Id', key: 'id', width: 10 },
+            { header: 'Value', key: 'value', width: 32 },
+            { header: 'Namespace', key: 'namespace', width: 15, },
+            { header: 'Key', key: 'key', width: 15, }
+        ];
+        for await (const line of rl) {
+            try {
+                worksheet.addRow(JSON.parse(line));
+                Exportlogger.log({
+                    level: 'info',
+                    message: `Successs, Data: ${line}`
+                });
+                
+            } catch (error) {
+                Exportlogger.log({
+                    level: 'info',
+                    message: `Failure, with error: ${error}, Data :${line}`
+                });
+            }
+            
+        }
+        await workbook.xlsx.writeFile('export.xlsx');
+        
+    } catch (error) {
+        throw error;
     }
-    await workbook.xlsx.writeFile('export.xlsx');
+
+    
 }
 
 const execute = async () => {

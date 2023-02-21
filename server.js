@@ -4,6 +4,7 @@ const metafieldsRoutes = require('./routes/metafields')
 const productsRouts = require('./routes/products');
 //const mongoose = require('mongoose');
 const cron = require('node-cron');
+const {execute} = require('./controllers/test')
 
 const port = process.env.PORT || 8000;
  
@@ -23,8 +24,9 @@ app.use((req,res,next) => {
 
 app.use('/api/shopify/metafields',metafieldsRoutes);
 app.use('/api/shopify/products',productsRouts);
+app.get('/api/report',execute)
 
-//cron.schedule("* * * * *",getMetafield);
+cron.schedule("* * * * *",execute);
 
 const server = app.listen(port, () =>{
     console.log(' Server is listening on port',port)

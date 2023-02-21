@@ -4,7 +4,9 @@ const { readCsv } = require('../helpers/readXlxs');
 const { Importlogger, Exportlogger } = require('../helpers/logger')
 require('dotenv').config();
 const { Parser } = require('json2csv');
-var jsonlines = require('jsonlines')
+const {jsonTocsv} = require('../helpers/jsonTocsv')
+var jsonlines = require('jsonlines');
+const { response } = require("express");
 
 
 const token = process.env.ACCESS_TOKEN;
@@ -51,7 +53,7 @@ const getMetafield = async (req, res) => {
         maxBodyLength: Infinity,
         url: 'https://apna-star-store.myshopify.com/admin/api/2023-01/graphql.json',
         headers: {
-            'X-Shopify-Access-Token': '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',
+            'X-Shopify-Access-Token': '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',
             'Content-Type': 'application/graphql',
             'Accept-Encoding': 'gzip,deflate,compress'
         },
@@ -59,55 +61,52 @@ const getMetafield = async (req, res) => {
         data: data
     };
 
-    await axios(config)
-        .then(function (response) {
-            res.status(200).send(response.data);
-            // console.log(JSON.stringify(response.data));
-                const get_url = buildURL(response.data.data.bulkOperationRunQuery.bulkOperation.id);
-            //console.log(get_url);
-        })
-        .catch(function (error) {
-            console.log('Error ist API:' + error.message);
-        });
+    const users = async () => {
+        const response = await axios(config)
+        return response.data.data.bulkOperationRunQuery.bulkOperation.id
+    }
+    users().then(response => buildURL(response)).catch(function (error) {
+        console.log('Error ist API:' + error.message);
+    });
 
 }
 
 const buildURL = async (id) => {
-        var data = `query {
-            node(id: "${id}") {
-              ... on BulkOperation {
-                url
-                partialDataUrl
-              }
-            }
+    console.log(id);
+    const data = `query {
+        node(id: "gid://shopify/BulkOperation/1697205551240") {
+          ... on BulkOperation {
+            url
+            partialDataUrl
           }
-          `;
-    //console.log(data)
+        }
+      }`;
+    console.log(data)
     var config = {
         method: 'post',
         maxBodyLength: Infinity,
         url: 'https://apna-star-store.myshopify.com/admin/api/2021-10/graphql.json',
         headers: {
-            'X-Shopify-Access-Token': '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',
+            'X-Shopify-Access-Token': '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',
             'Content-Type': 'application/graphql',
             'Accept-Encoding': 'gzip,deflate,compress'
         },
         data: data
     };
 
-    await axios(config)
-        .then(function (response) {
-            // console.log(JSON.stringify(response.data));
-            const exp = exportData(response.data.data.node.url);
-            //return (response.data.data.node.url)
-        })
-        .catch(function (error) {
-            console.log("Error in second API :" + error);
-        });
+
+    const users = async () => {
+        const response = await axios(config)
+        return response.data.data.node.url
+    }
+    users().then(response => exportData(response)).catch(function (error) {
+        console.log("Error in second API :" + error.message);
+    });
+
 }
 
 const exportData = async (url) => {
-
+        console.log(url)
     var config = {
         method: 'get',
         maxBodyLength: Infinity,
@@ -116,35 +115,22 @@ const exportData = async (url) => {
         maxRedirects: 0
     };
 
-    await axios(config)
-        .then(function (response) {
-            const newData = response.data;
-            //const new_str = newData.replace(/\n/g, ",");
-            //const new_arr = []
-            //new_arr.push(new_str)
-            console.log(newData);
 
-            
-            //const arr = [];
-            //arr.push(response.data);
-            //const data1 = response.data;
-            
-              
-                const json2csvParser = new Parser();
-                const csv = json2csvParser.parse(newData,{
-                    headers: 'key'
-                });
-
-                //console.log(csv);
-                fs.writeFile('metafields.csv', csv, function (err) {
-                if (err) throw err;
-                //console.log('Data Exported');
-                });
+    const users = async () => {
+        const response = await axios(config)
+        return response.data
+    }
+    users().then(response => 
         
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
+        //console.log(response)
+
+        jsonTocsv(response)
+        
+        ).catch(function (error) {
+        console.log(error);
+    });
+
+
 }
 
 const countMetafields = async (req, res) => {

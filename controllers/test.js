@@ -83,22 +83,12 @@ const genarateURL = async (id) => {
 
 };
 
-const writeFile = async (fileData) => {
-    return new Promise((resolve, reject) => {
-        try {
-            fs.writeFile(path, JSON.stringify(fileData))
-        } catch (error) {
-            reject(error)
-        }
-    })
-}
-
 const getAllData = async (url) => {
     const path = "data.jsonl";
     const { data } = await axios.get(url)
     await fsPromise.writeFile(path, data)
-    //await writeFile(data)
-    readFile(`D:\\metafield-scheduler-job\\data.jsonl`)
+    readFile(path)
+
 }
 
 const readFile = async (path) => {

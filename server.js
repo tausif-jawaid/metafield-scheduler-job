@@ -24,7 +24,7 @@ app.use((req,res,next) => {
 
 app.use('/api/shopify/metafields',metafieldsRoutes);
 app.use('/api/shopify/products',productsRouts);
-app.get('/api/report',execute)
+//app.get('/api/report',execute)
 
 cron.schedule("* * * * *",execute);
 

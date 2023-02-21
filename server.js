@@ -4,7 +4,7 @@ const metafieldsRoutes = require('./routes/metafields')
 const productsRouts = require('./routes/products');
 //const mongoose = require('mongoose');
 const cron = require('node-cron');
-const {execute} = require('./controllers/test')
+const {execute} = require('./controllers/exportmetafield')
 
 const port = process.env.PORT || 8000;
  

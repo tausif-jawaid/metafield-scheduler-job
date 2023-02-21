@@ -4,6 +4,9 @@ const fs = require("fs");
 const fsPromise = require("fs/promises")
 const readline = require("node:readline");
 const Excel = require("exceljs");
+require('dotenv').config();
+
+const token = process.env.ACCESS_TOKEN;
 
 function delay(time) {
     return new Promise(resolve =>
@@ -15,7 +18,7 @@ const restCall = async (data) => {
     try {
         const url = "https://apna-star-store.myshopify.com/admin/api/2021-10/graphql.json";
         const headers = {
-            "X-Shopify-Access-Token": "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",
+            "X-Shopify-Access-Token": token,
             "Content-Type": "application/graphql",
             "Accept-Encoding": "gzip,deflate,compress",
         };

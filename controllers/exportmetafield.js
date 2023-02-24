@@ -8,6 +8,7 @@ require('dotenv').config();
 const { Exportlogger } = require('../helpers/logger')
 
 const token = process.env.ACCESS_TOKEN;
+const store_name = process.env.STORE_NAME;
 
 function delay(time) {
     return new Promise(resolve =>
@@ -17,7 +18,7 @@ function delay(time) {
 
 const restCall = async (data) => {
     try {
-        const url = "https://apna-star-store.myshopify.com/admin/api/2021-10/graphql.json";
+        const url = `${store_name}/admin/api/2021-10/graphql.json`;
         const headers = {
             "X-Shopify-Access-Token": token,
             "Content-Type": "application/graphql",
@@ -44,7 +45,6 @@ const genarateMutationQuery = async () => {
                                     node {
                                         value
                                         namespace
-                                        id
                                         key
                                     }
                                 }
@@ -93,42 +93,106 @@ const getAllData = async (url) => {
 }
 
 const readFile = async (path) => {
-
+    var arr = [];
+    arr.push({ header: "Product Id", key: "id", width: 15 });
+    var newArr = [];
     try {
         const fileStream = fs.createReadStream(path);
         const rl = readline.createInterface({ input: fileStream, crlfDelay: Infinity, });
         const workbook = new Excel.Workbook();
         const worksheet = workbook.addWorksheet("My Sheet");
-        worksheet.columns = [
-            { header: 'Id', key: 'id', width: 10 },
-            { header: 'Value', key: 'value', width: 32 },
-            { header: 'Namespace', key: 'namespace', width: 15, },
-            { header: 'Key', key: 'key', width: 15, }
-        ];
+
+        var obj = {};
         for await (const line of rl) {
             try {
-                worksheet.addRow(JSON.parse(line));
+                const data = JSON.parse(line);
+                var currid
+
+                if ("id" in data) {
+                    //worksheet.addRow(obj);
+                    if (Object.keys(obj).length !== 0) {
+                        newArr.push(obj);
+                    }
+                    obj = {};
+                    currid = data["id"];
+                    currid = currid.replace("gid://shopify/Product/", "");
+                    obj["id"] = currid;
+                    continue;
+                }
+
+                key1 = data.key;
+                value = data.value
+                obj[key1] = value;
+
+                const found = arr.some(el => el.key === key1);
+                if (!found) arr.push({ header: key1, key: key1, width: 15 });
+
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        newArr.push(obj)
+
+        worksheet.columns = arr;
+        for (let val of newArr) {
+            try {
+                worksheet.addRow(val);
                 Exportlogger.log({
                     level: 'info',
-                    message: `Successs, Data: ${line}`
+                    message: `Successs, Id: ${val.id}`
                 });
-                
+
             } catch (error) {
                 Exportlogger.log({
                     level: 'info',
-                    message: `Failure, with error: ${error}, Data :${line}`
+                    message: `Failure, with error: ${error}, Id :${val.id}`
                 });
             }
-            
+            //worksheet.addRow(val);
         }
         await workbook.xlsx.writeFile('export.xlsx');
-        
+
     } catch (error) {
         throw error;
     }
-
-    
 }
+
+
+// const readFile = async (path) => {
+
+//     try {
+//         const fileStream = fs.createReadStream(path);
+//         const rl = readline.createInterface({ input: fileStream, crlfDelay: Infinity, });
+//         const workbook = new Excel.Workbook();
+//         const worksheet = workbook.addWorksheet("My Sheet");
+//         worksheet.columns = [
+//             { header: 'Id', key: 'id', width: 10 },
+//             { header: 'Value', key: 'value', width: 32 },
+//             { header: 'Namespace', key: 'namespace', width: 15, },
+//             { header: 'Key', key: 'key', width: 15, }
+//         ];
+//         for await (const line of rl) {
+//             try {
+//                 worksheet.addRow(JSON.parse(line));
+//                 Exportlogger.log({
+//                     level: 'info',
+//                     message: `Successs, Data: ${line}`
+//                 });
+
+//             } catch (error) {
+//                 Exportlogger.log({
+//                     level: 'info',
+//                     message: `Failure, with error: ${error}, Data :${line}`
+//                 });
+//             }
+
+//         }
+//         await workbook.xlsx.writeFile('export.xlsx');
+
+//     } catch (error) {
+//         throw error;
+//     }    
+// }
 
 const execute = async () => {
     const id = await genarateMutationQuery();

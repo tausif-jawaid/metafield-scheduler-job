@@ -152,8 +152,8 @@ const countMetafields = async (req, res) => {
 
 // create new metafields for specific product
 const createMetafields = async (req, res) => {
-    // const data = readCsv(filePath);
-    const data = req.body;
+     const data = readCsv(filePath);
+    //const data = req.body;
     const logs = {};
     let fail = 0;
     let success = 0;
@@ -175,11 +175,11 @@ const createMetafields = async (req, res) => {
         }
         setTimeout(() => {
             axios({
-                url: "https://apna-star-store.myshopify.com/admin/api/2023-01/products/" + item.id + "/metafields.json",
+                url: "https://metafieldexport.myshopify.com/admin/api/2023-01/products/" + item.id + "/metafields.json",
                 method: "post",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-Shopify-Access-Token": token,
+                    "X-Shopify-Access-Token": "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",
                     "Accept-Encoding": "gzip,deflate,compress"
                 },
                 data: JSON.stringify(data)
